@@ -15,8 +15,14 @@ metadata:
 
 A Hermes skill that tracks TV shows and movies you're watching, stored as .md files in your Obsidian vault. It pulls data from TMDB, lets you update status via natural-language Telegram messages, and can alert you about upcoming seasons.
 
-## Completed / Finished-Airing Shows
-When a show has finished airing (TMDB `next_episode_to_air` is null / no `next_season_number`), set `seasons_aired = seasons_total`, `status = completed`, and `next_season_air_date = null`. Confirm with TMDB `status: Returning Series` or `Ended` before recording — do not assume a restart if no new season is confirmed.
+## Mandatory: Media Index Update
+
+**Every single add, update, or status change for a TV show or movie MUST update `Media Index.md` immediately after the per-title .md file is written.** No exceptions, no skipping, no "I'll get to it later." The index is the dashboard the user checks, and a stale index is worse than no index.
+
+To update it:
+1. Read all .md files in `TV_Shows/` and `Movies/`.
+2. Group by `status` (watching, completed, planning, dropped).
+3. Rewrite `Media Index.md` with the current `updated` date and a one-line summary per title under the matching heading.
 
 ## Completed / Finished-Airing Shows
 When a show has finished airing (TMDB `next_episode_to_air` is null / no `next_season_number`), set `seasons_aired = seasons_total`, `status = completed`, and `next_season_air_date = null`. Confirm with TMDB `status: Returning Series` or `Ended` before recording — do not assume a restart if no new season is confirmed.
@@ -158,13 +164,45 @@ After getting the TMDB ID, the skill uses the details endpoint with `append_to_r
 4. Update status as you go: "I'm watching The Crown now" / "Finished The Crown".
 5. Ask for lists or details at any time.
 
+## Cron Job: Automated Weekly Watch Tracking
+
+A cron job runs every 2 weeks (day 1 and 15 of each month at 3am):
+
+**Script:** `/root/.hermes/skills/note-taking/media-tracker/cron-check.sh`
+
+**What it does:**
+1. Finds all TV show `.md` files in `TV_Shows/`.
+2. Passes them to Hermes agent for AI analysis (using the skill as context).
+3. Uses Hermes's AI to understand the MD content, track status changes, and detect new season information.
+4. Queries TMDB for any `watching` shows to check for new season air dates.
+5. Sends Telegram notifications to your DM if there are changes:
+   - New season just started (e.g., "The Gilded Age Season 4 starts 2026-11-08")
+   - Show just completed (e.g., "The Diplomat completed all seasons")
+   - Upcoming season announcements (new `next_season_air_date` for a show)
+   - Shows that need attention based on status in the MD files
+
+**Example notifications:**
+```
+🚀 New Season Started!
+The Gilded Age Season 4 just aired 2026-11-08
+
+✅ Show Completed!
+The Diplomat finished all 4 seasons (2026-10-15)
+
+⚠️ Upcoming Season!
+Stranger Things Season 5 starting 2027-03-15 (was previously delayed)
+```
+
+The Hermes agent uses the MD files as context to understand show progression and interprets the TMDB API results intelligently, ensuring notifications are meaningful and actionable.
+
+---
 ## Setup Checklist
 
-- [ ] TMDB bearer token in `~/.hermes/.env` (if not present, add `TMDB_BEARER_TOKEN=***`).
-- [ ] Hermes TMDB `tmdb-api` skill is loaded.
-- [ ] Hermes Obsidian `obsidian` skill is loaded.
-- [ ] Media tracker skill is loaded (this file).
-- [ ] Vault path is accessible (default is `~/obsidian/vault/hermes-data`).
-- [ ] (Optional) Cron job for upcoming season alerts (set up via `cronjob` tool).
+- [x] TMDB bearer token in `~/.hermes/.env` as `TMDB_BEARER_TOKEN`
+- [x] Hermes TMDB `tmdb-api` skill loaded
+- [x] Hermes Obsidian `obsidian` skill loaded
+- [x] Media tracker skill loaded
+- [x] Vault path accessible: `/root/obsidian/vault/hermes-data`
+- [x] Cron job set up: `cron-check.sh` runs every 2 weeks at 3am (days 1 & 15), uses Hermes agent to read MD file context
 
-Once ready, just start sending natural‑language Telegram messages with titles you want to track!
+The cron uses Hermes agent so it understands the context in each `.md` file (status, seasons aired, notes) rather than just parsing raw text.
