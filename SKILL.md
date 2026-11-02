@@ -15,6 +15,12 @@ metadata:
 
 A Hermes skill that tracks TV shows and movies you're watching, stored as .md files in your Obsidian vault. It pulls data from TMDB, lets you update status via natural-language Telegram messages, and can alert you about upcoming seasons.
 
+## Completed / Finished-Airing Shows
+When a show has finished airing (TMDB `next_episode_to_air` is null / no `next_season_number`), set `seasons_aired = seasons_total`, `status = completed`, and `next_season_air_date = null`. Confirm with TMDB `status: Returning Series` or `Ended` before recording — do not assume a restart if no new season is confirmed.
+
+## Completed / Finished-Airing Shows
+When a show has finished airing (TMDB `next_episode_to_air` is null / no `next_season_number`), set `seasons_aired = seasons_total`, `status = completed`, and `next_season_air_date = null`. Confirm with TMDB `status: Returning Series` or `Ended` before recording — do not assume a restart if no new season is confirmed.
+
 ## Data Model
 
 Each title is stored as a `.md` file with TMDB ID and personal status tracking:
@@ -27,10 +33,10 @@ title: "Stranger Things"
 status: completed        # planning | watching | completed | dropped
 added: 2026-11-01
 last_updated: 2026-11-01
-seasons_total: 5
+seasons_total: 4
 seasons_aired: 4
-next_season_air_date: 2027-03-15
-next_season_number: 5
+next_season_air_date: null
+next_season_number: null
 genres: [Sci-Fi, Horror]
 poster_path: /somePoster.jpg
 ---
@@ -41,7 +47,7 @@ Body can include notes, ratings, watch logs, or anything else you want to rememb
 **Status values:**
 - `planning` – You want to watch it later
 - `watching` – Currently watching or actively planning to start
-- `completed` – You've finished watching it
+- `completed` – You've finished watching it (including shows with no upcoming seasons)
 - `dropped` – You stopped watching or lost interest
 
 ## File Organization
@@ -75,16 +81,17 @@ obsidian/vault/hermes-data/
 - **What it does:**
   1. Searches TMDB for the title.
   2. Pulls TMDB data (seasons, air dates, genres, poster).
-  3. Creates or updates the .md file.
-  4. Sets status based on your intent:
+  3. Creates or updates the .md file (plain filenames like `Stranger Things.md`, never `[[Stranger Things]].md`).
+  4. Updates `Media Index.md` with the latest status summary (always — never skip).
+  5. Sets status based on your intent:
      - "I want to watch" → status=planning (or to‑watch if you prefer)
      - "I finished" / "Just watched" → status=completed
      - "I'm watching" / "Started" → status=watching
-  5. Replies with the pulled info and a confirmation.
+  6. Replies with the pulled info and a confirmation.
 
 ### b) Update Status
 - **Trigger:** "Watching [Title] now", "Dropped [Title]", "Completed [Title]".
-- **What it does:** Finds the .md file and updates the `status` + `last_updated` fields.
+- **What it does:** Finds the .md file, updates the `status` + `last_updated` fields, then updates `Media Index.md`.
 
 ### c) List by Status
 - **Trigger:** "What am I watching?", "What haven't I watched?".
