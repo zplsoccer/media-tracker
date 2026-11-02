@@ -51,13 +51,14 @@ The skill stores files in your Obsidian vault at:
 ```
 obsidian/vault/hermes-data/
 ├── Media/
-│   ├── TV Shows/          # TV show .md files
-│   │   ├── [[Stranger Things]].md
+│   ├── TV_Shows/         # TV show .md files (no spaces/slashes in folder name)
+│   │   ├── Stranger Things.md
 │   │   └── ...
-│   └── Movies/             # Movie .md files
-│       ├── [[The Batman]].md
-│       └── ...
-└── Media Index.md          # Optional: quick summary dashboard (created by skill)
+│   ├── Movies/            # Movie .md files
+│   │   ├── The Batman.md
+│   │   └── ...
+│   └── Media Index.md     # Optional: quick summary dashboard (must be inside Media/)
+└── ...
 ```
 
 The skill automatically creates the directory structure on first use.
