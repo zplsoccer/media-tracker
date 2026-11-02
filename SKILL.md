@@ -61,7 +61,12 @@ obsidian/vault/hermes-data/
 └── ...
 ```
 
-The skill automatically creates the directory structure on first use.
+- The skill automatically creates the directory structure on first use.
+
+## Pitfalls
+
+- Do NOT use `[[Title]].md` bracket notation for filenames — the user prefers plain filenames (`Stranger Things.md`). Brackets are for Obsidian wiki-links in note bodies, not filenames.
+- Folder names should not contain spaces (use `TV_Shows`, not `TV Shows`) so paths stay simple and escape-free.
 
 ## Core Functions
 
