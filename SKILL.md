@@ -195,6 +195,15 @@ Stranger Things Season 5 starting 2027-03-15 (was previously delayed)
 
 The Hermes agent uses the MD files as context to understand show progression and interprets the TMDB API results intelligently, ensuring notifications are meaningful and actionable.
 
+## Templates
+
+Copy these when creating new entries:
+
+- `templates/tv_show_template.md` — starter for TV shows
+- `templates/movie_template.md` — starter for movies
+
+Replace `<...>` placeholders with real TMDB data before saving.
+
 ---
 ## Setup Checklist
 
